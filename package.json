@@ -1,0 +1,19 @@
+{
+  "name": "tournament-console-app",
+  "version": "1.0.0",
+  "description": "A console app for running a small league or knockout cup: add participants, draw the order, enter results and follow the standings.",
+  "type": "module",
+  "main": "src/app.js",
+  "scripts": {
+    "start": "node src/app.js"
+  },
+  "author": "Anton Nordström",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "dice-rng-toolkit": "github:ThJoker3/Dice-RNG-Toolkit",
+    "tournament-scheduler": "github:nordstrom-a/tournament-scheduler"
+  }
+}
