@@ -5,13 +5,16 @@ import { InputParser } from './InputParser.js'
  */
 export class TournamentApp {
   #io
+  #participantDraw
   #inputParser = new InputParser()
 
   /**
    * @param {import('./ConsoleIO.js').ConsoleIO} io - Used for all input and output.
+   * @param {import('./ParticipantDraw.js').ParticipantDraw} participantDraw - Decides the order of the participants.
    */
-  constructor(io) {
+  constructor(io, participantDraw) {
     this.#io = io
+    this.#participantDraw = participantDraw
   }
 
   /**
@@ -23,7 +26,9 @@ export class TournamentApp {
     this.#io.print('Welcome to Tournament Console App!')
     const format = await this.#askFormat()
     const names = await this.#askParticipantNames()
-    this.#io.print(`\nA ${format} with ${names.length} participants: ${names.join(', ')}`)
+    const drawnNames = this.#participantDraw.draw(names)
+    this.#showDraw(drawnNames)
+    this.#io.print(`\nA ${format} is ready to start.`)
   }
 
   async #askFormat() {
@@ -42,5 +47,10 @@ export class TournamentApp {
       names.push(name)
     }
     return names
+  }
+
+  #showDraw(drawnNames) {
+    this.#io.print('\nThe draw:')
+    drawnNames.forEach((name, index) => this.#io.print(`  ${index + 1}. ${name}`))
   }
 }
