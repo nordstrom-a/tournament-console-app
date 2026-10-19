@@ -19,7 +19,7 @@ export class TournamentApp {
   constructor(io, participantDraw) {
     this.#io = io
     this.#participantDraw = participantDraw
-    this.#leagueRunner = new LeagueRunner(new RoundPlayer(io), this.#inputParser)
+    this.#leagueRunner = new LeagueRunner(io, new RoundPlayer(io), this.#inputParser)
   }
 
   /**
