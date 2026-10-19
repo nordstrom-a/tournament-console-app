@@ -51,6 +51,34 @@ export class InputParser {
     return answer
   }
 
+  /**
+   * @param {string} answer - The result as "home-away", e.g. "2-1".
+   * @returns {{ homeScore: number, awayScore: number }} The scores.
+   * @throws {InvalidInputError} If the answer is not two whole numbers separated by a dash.
+   */
+  parseResult(answer) {
+    const scores = answer.match(/^(\d+)\s*-\s*(\d+)$/)
+    if (scores === null) {
+      throw new InvalidInputError('Please enter the result as two whole numbers, e.g. 2-1.')
+    }
+    return { homeScore: Number(scores[1]), awayScore: Number(scores[2]) }
+  }
+
+  /**
+   * Like parseResult, but for matches that must have a winner.
+   *
+   * @param {string} answer - The result as "home-away", e.g. "2-1".
+   * @returns {{ homeScore: number, awayScore: number }} The scores.
+   * @throws {InvalidInputError} If the answer is invalid or a draw.
+   */
+  parseDecisiveResult(answer) {
+    const result = this.parseResult(answer)
+    if (result.homeScore === result.awayScore) {
+      throw new InvalidInputError('A cup match must have a winner. Please enter a result that is not a draw.')
+    }
+    return result
+  }
+
   #parseWholeNumber(answer) {
     return /^\d+$/.test(answer) ? Number(answer) : null
   }
