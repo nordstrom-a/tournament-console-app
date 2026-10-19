@@ -1,4 +1,5 @@
 import { Participant } from 'tournament-scheduler'
+import { CupRunner } from './CupRunner.js'
 import { InputParser } from './InputParser.js'
 import { LeagueRunner } from './LeagueRunner.js'
 import { RoundPlayer } from './RoundPlayer.js'
@@ -11,6 +12,7 @@ export class TournamentApp {
   #participantDraw
   #inputParser = new InputParser()
   #leagueRunner
+  #cupRunner
 
   /**
    * @param {import('./ConsoleIO.js').ConsoleIO} io - Used for all input and output.
@@ -19,7 +21,9 @@ export class TournamentApp {
   constructor(io, participantDraw) {
     this.#io = io
     this.#participantDraw = participantDraw
-    this.#leagueRunner = new LeagueRunner(io, new RoundPlayer(io), this.#inputParser)
+    const roundPlayer = new RoundPlayer(io)
+    this.#leagueRunner = new LeagueRunner(io, roundPlayer, this.#inputParser)
+    this.#cupRunner = new CupRunner(io, roundPlayer, this.#inputParser)
   }
 
   /**
@@ -64,7 +68,7 @@ export class TournamentApp {
     if (format === 'league') {
       await this.#leagueRunner.run(participants)
     } else {
-      this.#io.print('\nThe cup is not available yet.')
+      await this.#cupRunner.run(participants)
     }
   }
 }
