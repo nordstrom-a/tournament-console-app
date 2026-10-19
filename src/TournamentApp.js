@@ -1,4 +1,7 @@
+import { Participant } from 'tournament-scheduler'
 import { InputParser } from './InputParser.js'
+import { LeagueRunner } from './LeagueRunner.js'
+import { RoundPlayer } from './RoundPlayer.js'
 
 /**
  * Guides the user through setting up and playing a tournament.
@@ -7,6 +10,7 @@ export class TournamentApp {
   #io
   #participantDraw
   #inputParser = new InputParser()
+  #leagueRunner
 
   /**
    * @param {import('./ConsoleIO.js').ConsoleIO} io - Used for all input and output.
@@ -15,6 +19,7 @@ export class TournamentApp {
   constructor(io, participantDraw) {
     this.#io = io
     this.#participantDraw = participantDraw
+    this.#leagueRunner = new LeagueRunner(new RoundPlayer(io), this.#inputParser)
   }
 
   /**
@@ -28,7 +33,8 @@ export class TournamentApp {
     const names = await this.#askParticipantNames()
     const drawnNames = this.#participantDraw.draw(names)
     this.#showDraw(drawnNames)
-    this.#io.print(`\nA ${format} is ready to start.`)
+    const participants = drawnNames.map(name => new Participant(name))
+    await this.#playTournament(format, participants)
   }
 
   async #askFormat() {
@@ -40,7 +46,7 @@ export class TournamentApp {
 
   async #askParticipantNames() {
     this.#io.print()
-    const count = await this.#io.askUntilValid('How many participants? ',answer => this.#inputParser.parseParticipantCount(answer))
+    const count = await this.#io.askUntilValid('How many participants? ', answer => this.#inputParser.parseParticipantCount(answer))
     const names = []
     for (let number = 1; number <= count; number++) {
       const name = await this.#io.askUntilValid(`Participant ${number}: `, answer => this.#inputParser.parseParticipantName(answer, names))
@@ -52,5 +58,13 @@ export class TournamentApp {
   #showDraw(drawnNames) {
     this.#io.print('\nThe draw:')
     drawnNames.forEach((name, index) => this.#io.print(`  ${index + 1}. ${name}`))
+  }
+
+  async #playTournament(format, participants) {
+    if (format === 'league') {
+      await this.#leagueRunner.run(participants)
+    } else {
+      this.#io.print('\nThe cup is not available yet.')
+    }
   }
 }
