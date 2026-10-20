@@ -1,4 +1,5 @@
 import { SingleEliminationScheduler } from 'tournament-scheduler'
+import { BracketView } from './BracketView.js'
 
 /**
  * Plays a knockout cup where the winner of each match advances until a champion is decided.
@@ -20,21 +21,22 @@ export class CupRunner {
   }
 
   /**
-   * Plays round after round until the final is played, then shows the champion.
+   * Plays round after round until the final is played, then shows the bracket and the champion.
    *
    * @param {import('tournament-scheduler').Participant[]} participants - At least two participants, in bracket order.
    * @throws {import('./InputClosedError.js').InputClosedError} If the user closes the input.
    */
   async run(participants) {
     const scheduler = new SingleEliminationScheduler()
-    let round = scheduler.createFirstRound(participants)
-    await this.#playRound(round)
+    const rounds = [scheduler.createFirstRound(participants)]
+    await this.#playRound(rounds.at(-1))
 
-    while (!this.#isFinal(round)) {
-      round = scheduler.createNextRound()
-      await this.#playRound(round)
+    while (!this.#isFinal(rounds.at(-1))) {
+      rounds.push(scheduler.createNextRound())
+      await this.#playRound(rounds.at(-1))
     }
-    this.#showChampion(round)
+    this.#showBracket(rounds)
+    this.#showChampion(rounds.at(-1))
   }
 
   async #playRound(round) {
@@ -43,6 +45,11 @@ export class CupRunner {
 
   #isFinal(round) {
     return round.getMatches().length === 1 && round.getParticipantsWithBye().length === 0
+  }
+
+  #showBracket(rounds) {
+    this.#io.print('\nThe bracket:')
+    this.#io.print(new BracketView(rounds).format())
   }
 
   #showChampion(final) {
