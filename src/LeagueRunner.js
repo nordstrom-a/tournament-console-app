@@ -47,7 +47,17 @@ export class LeagueRunner {
   }
 
   #showWinner(standings) {
-    const [leader] = standings.getEntries()
+    const [leader, runnerUp] = standings.getEntries()
+    if (this.#isTied(leader, runnerUp)) {
+      this.#io.print('\nThe league ends with a tie at the top!')
+      return
+    }
     this.#io.print(`\n${leader.getParticipant().getName()} wins the league!`)
+  }
+
+  #isTied(first, second) {
+    return first.getPoints() === second.getPoints() &&
+      first.getScoreDifference() === second.getScoreDifference() &&
+      first.getScored() === second.getScored()
   }
 }
