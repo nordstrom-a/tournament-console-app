@@ -1,16 +1,24 @@
 /**
- * Formats league standings as a text table for the console.
+ * Formats league standings as a table with borders for the console.
  */
 export class StandingsView {
+  #headers = ['#', 'Name', 'P', 'W', 'D', 'L', 'Score', 'Diff', 'Pts']
+  #nameColumn = 1
+
   /**
    * @param {import('tournament-scheduler').StandingsEntry[]} entries - Best placed first, as given by Standings.getEntries().
-   * @returns {string} A header row followed by one row per participant.
+   * @returns {string} A table with a header row and one row per participant.
    */
   format(entries) {
-    const nameWidth = Math.max('Name'.length, ...entries.map(entry => entry.getParticipant().getName().length))
-    const header = this.#formatRow(['#', 'Name', 'P', 'W', 'D', 'L', 'Score', 'Diff', 'Pts'], nameWidth)
-    const rows = entries.map((entry, index) => this.#formatRow(this.#createCells(entry, index + 1), nameWidth))
-    return [header, ...rows].join('\n')
+    const rows = entries.map((entry, index) => this.#createCells(entry, index + 1))
+    const widths = this.#calculateColumnWidths(rows)
+    return [
+      this.#formatBorder('┌', '┬', '┐', widths),
+      this.#formatRow(this.#headers, widths),
+      this.#formatBorder('├', '┼', '┤', widths),
+      ...rows.map(row => this.#formatRow(row, widths)),
+      this.#formatBorder('└', '┴', '┘', widths)
+    ].join('\n')
   }
 
   #createCells(entry, position) {
@@ -31,8 +39,20 @@ export class StandingsView {
     return difference > 0 ? `+${difference}` : String(difference)
   }
 
-  #formatRow(cells, nameWidth) {
-    const [position, name, ...numbers] = cells
-    return `  ${position.padStart(2)}  ${name.padEnd(nameWidth)}${numbers.map(number => number.padStart(6)).join('')}`
+  #calculateColumnWidths(rows) {
+    return this.#headers.map((header, column) => Math.max(header.length, ...rows.map(row => row[column].length)))
+  }
+
+  #formatBorder(left, middle, right, widths) {
+    return left + widths.map(width => '─'.repeat(width + 2)).join(middle) + right
+  }
+
+  #formatRow(cells, widths) {
+    const alignedCells = cells.map((cell, column) => this.#alignCell(cell, column, widths[column]))
+    return `│ ${alignedCells.join(' │ ')} │`
+  }
+
+  #alignCell(cell, column, width) {
+    return column === this.#nameColumn ? cell.padEnd(width) : cell.padStart(width)
   }
 }
