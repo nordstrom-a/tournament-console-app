@@ -33,6 +33,13 @@ export class TournamentApp {
    */
   async run() {
     this.#io.print('Welcome to Tournament Console App!')
+    do {
+      await this.#playNewTournament()
+    } while (await this.#askPlayAgain())
+    this.#io.print('\nThanks for playing!')
+  }
+
+  async #playNewTournament() {
     const format = await this.#askFormat()
     const names = await this.#askParticipantNames()
     const drawnNames = this.#participantDraw.draw(names)
@@ -70,5 +77,10 @@ export class TournamentApp {
     } else {
       await this.#cupRunner.run(participants)
     }
+  }
+
+  async #askPlayAgain() {
+    this.#io.print()
+    return this.#io.askUntilValid('Play a new tournament? (y/n) ', answer => this.#inputParser.parseYesOrNo(answer))
   }
 }

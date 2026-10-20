@@ -79,6 +79,22 @@ export class InputParser {
     return result
   }
 
+  /**
+   * @param {string} answer - 'y' or 'yes', 'n' or 'no', in any letter case.
+   * @returns {boolean} True for yes, false for no.
+   * @throws {InvalidInputError} If the answer is neither yes nor no.
+   */
+  parseYesOrNo(answer) {
+    const normalizedAnswer = answer.toLowerCase()
+    if (normalizedAnswer === 'y' || normalizedAnswer === 'yes') {
+      return true
+    }
+    if (normalizedAnswer === 'n' || normalizedAnswer === 'no') {
+      return false
+    }
+    throw new InvalidInputError('Please enter y or n.')
+  }
+
   #parseWholeNumber(answer) {
     return /^\d+$/.test(answer) ? Number(answer) : null
   }
