@@ -31,29 +31,20 @@ export class CupRunner {
     const rounds = [scheduler.createFirstRound(participants)]
     await this.#playRound(rounds.at(-1))
 
-    while (!this.#isFinal(rounds.at(-1))) {
+    while (!scheduler.isComplete()) {
       rounds.push(scheduler.createNextRound())
       await this.#playRound(rounds.at(-1))
     }
     this.#showBracket(rounds)
-    this.#showChampion(rounds.at(-1))
+    this.#io.print(`\n${scheduler.getChampion().getName()} wins the cup!`)
   }
 
   async #playRound(round) {
     await this.#roundPlayer.play(round, answer => this.#inputParser.parseDecisiveResult(answer))
   }
 
-  #isFinal(round) {
-    return round.getMatches().length === 1 && round.getParticipantsWithBye().length === 0
-  }
-
   #showBracket(rounds) {
     this.#io.print('\nThe bracket:')
     this.#io.print(new BracketView(rounds).format())
-  }
-
-  #showChampion(final) {
-    const [finalMatch] = final.getMatches()
-    this.#io.print(`\n${finalMatch.getWinner().getName()} wins the cup!`)
   }
 }
